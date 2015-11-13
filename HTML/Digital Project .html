@@ -1,0 +1,186 @@
+<html>
+	<head>
+		<title>
+			Logic Gate Simulator
+		</title>
+	<style>
+	div {
+    overflow:scroll;
+	}
+
+	body{
+		display: block;
+		height: 700px;
+		margin-bottom: 0px;
+		margin-left: 0px;
+		margin-right: 0px;
+		margin-top: 0px;
+		width: 1180px; 
+	}
+
+	#titleContainer{
+		
+		border-radius: 0em; 
+        border-width:0px; 
+        padding-left:0px; 
+        padding-top:0px; 
+        padding-bottom:0px; 
+        margin:0px;
+        margin-right: 0px;
+        margin-left: 0px;
+        margin-bottom: 0px;
+        margin-top: 0px; 
+        width:1500px;"
+	}
+
+	#titleText{
+		background-color:91241f;
+    	color:white;
+    	text-align:center;
+    	padding:20px; 
+    	font-size: 300%;
+    	margin-right: 0px;
+        margin-left: 0px;
+        margin-bottom: 0px;
+        margin-top: 0px; 
+
+	} 
+	p{
+		text-align: center;
+		color:white;
+	}
+	#text{
+		background-color:91241f;
+    	color:white;
+    	text-align:center;
+    	padding:0px; 
+    	font-size: 100%;
+    	margin-right: 0px;
+        margin-left: 0px;
+        margin-bottom: 0px;
+        margin-top: 0px; 
+	}
+	#foot{
+		background-color:91241f;
+    	color:white;
+    	text-align:center;
+    	padding:0px; 
+    	font-size: 100%;
+    	margin-right: 0px;
+        margin-left: 0px;
+        margin-bottom: 0px;
+        margin-top: 0px; 
+
+	}
+
+	#down{
+
+		background-color:91241f;
+		border-radius: 0em; 
+        border-width:0px; 
+        padding-left:0px; 
+        padding-top:0px; 
+        padding-bottom:0px; 
+        margin:0px;
+        margin-right: 0px;
+        margin-left: 0px;
+        margin-bottom: 0px;
+        margin-top: 0px; 
+        width:1500px;
+        text-align: center;
+		color: white;
+		font-size: 120%
+	}
+
+	
+	
+
+	</style>	
+ 
+	</head>
+	<body>
+	
+		<div id="titleContainer">
+
+			<h1 id="titleText">Logic Gate Simulator</h1>
+			
+		</div>
+		<div id="titleContainer">
+			<p id="text"> Displays the circuit, Longest Path, info of Gates</p>
+			<p id="text"><br><br><br></p>
+		</div>
+		<p>
+			<div ng-controller="ControlFile">
+  			<input type="file" id="file" name="file"/>
+  			<br>
+  			<button ng-click="submit()">submit</button>
+ 			<p>{{data}}
+ 		</p>
+		</div>
+		<script>
+			var myApp = angular.module('myApp',[]);
+			function ControlFile($scope) {
+    		$scope.data = 'none';
+    		$scope.submit= function(){
+    		var f = document.getElementById('file').files[0],
+          	r = new FileReader();
+    		r.onloadend = function(e){
+    	    $scope.data = e.target.result;
+      }
+      r.readAsBinaryString(f);
+    }
+}
+			</script>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+
+		</div>
+		</p>
+
+		
+	</body>
+	<footer>
+		<div id="down">
+			<address>
+				Presented by: <a style="color:white" href="mailto:bahermursi@aucegypt.edu"><br> Baher Mursi</a> <a style="color:white" href="mailto:hebasakr@aucegypt.edu"><br>Heba Sakr</a><br><a style="color:white" href=				"mailto:therealyoussef@aucegypt.edu">Youssef Ayman</a><br><br>
+
+				Presented to: <a style="color:white" href="mailto:mshalan@aucegypt.edu"><br> Dr.Mohamed Shalan</a>. <br> <br><a style="color:white" href="mailto:bahermursi@aucegypt.edu,hebasakr@aucegypt.edu, therealyoussef@aucegypt.edu">For any questions</a>
+
+
+				
+			</address>	
+
+			<a style="color:white" href="http://catalog.aucegypt.edu/preview_course_nopop.php?catoid=20&coid=31887">Digital Design 1</a><br>
+				
+			Project 1<br>
+			For any questions: <a style="color:white" href="mailto:bahermursi@aucegypt.edu,hebasakr@aucegypt.edu, therealyoussef@aucegypt.edu">Contact us</a>
+
+		</div>
+
+	</footer>
+</html>
