@@ -13,16 +13,17 @@ public:
 	string getJSON() const;
 private:
 	Circuit *circuit;
-	string JSONString;
-	string gatesDescriptions;
-	unordered_map<string, string> gateDescriptionIndex;
-	string indexInGatesDescriptionsArray;
+	string JSONString, gatesDescriptions, indexInGatesDescriptionsArray, longestPathsArray, indexInLongestPathsArray;
+	vector<int> circuitIndexToWavedromIndex;
 	vector<bool>visited;
 	vector<int>outputs;
-	vector<string> JSONStringMemoization, indexInGatesDescriptionsArrayMemoization;
-	pair<string, string> createJSONStringAndGatesDescriptions(int);
+	int gateIndex, inputIndex;
+	vector<string> JSONStringMemoization, indexInGatesDescriptionsArrayMemoization, indexInLongestPathsArrayMemoization;
+	pair<string, string>createJSON(int);
+	string continueJSONCreation(int);
 	bool containsCycles();
 	void parseGate(const string &, string &);
+	string getLongestPath(int);
 };
 
 #endif
