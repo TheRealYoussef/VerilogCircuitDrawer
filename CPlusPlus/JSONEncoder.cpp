@@ -105,10 +105,9 @@ pair<string, string> JSONEncoder::createJSON(int n) {
 			string gateDescription = "'Type: " + nodeType + "\\nName: " + nodeName + "\\nT-Rise: " + to_string(tRise) + "\\nT-Fall: " + to_string(tFall) + "\\n'";
 			gatesDescriptions += gateDescription;
 		}
-		if (indexInGatesDescriptionsArray != "[") {
-			indexInGatesDescriptionsArrayReturn += ',';
+		if (indexInGatesDescriptionsArray != "[")
 			indexInGatesDescriptionsArray += ',';
-		}
+		indexInGatesDescriptionsArrayReturn += ',';
 		parseGate(nodeType, JSONString);
 		parseGate(nodeType, JSONStringReturn);
 		indexInGatesDescriptionsArrayReturn += to_string(circuitIndexToWavedromIndex[n]);
@@ -133,8 +132,6 @@ string JSONEncoder::continueJSONCreation(int n) {
 	visited[n] = true;
 	string &indexInLongestPathsArrayReturn = indexInLongestPathsArrayMemoization[n];
 	if (indexInLongestPathsArrayReturn != "") {
-		if (indexInLongestPathsArray != "[" && indexInLongestPathsArrayReturn.size() > 0 && indexInLongestPathsArrayReturn[0] != ',')
-			indexInLongestPathsArray += ',';
 		indexInLongestPathsArray += indexInLongestPathsArrayReturn;
 		return indexInLongestPathsArrayReturn;
 	}
@@ -145,10 +142,9 @@ string JSONEncoder::continueJSONCreation(int n) {
 				longestPathsArray += ',';
 			longestPathsArray += getLongestPath(n);
 		}
-		if (indexInLongestPathsArray != "[") {
-			indexInLongestPathsArrayReturn += ',';
+		if (indexInLongestPathsArray != "[")
 			indexInLongestPathsArray += ',';
-		}
+		indexInLongestPathsArrayReturn += ',';
 		indexInLongestPathsArrayReturn += to_string(circuitIndexToWavedromIndex[n]);
 		indexInLongestPathsArray += to_string(circuitIndexToWavedromIndex[n]);
 	}
