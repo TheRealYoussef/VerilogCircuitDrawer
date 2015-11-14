@@ -180,7 +180,7 @@ void JSONEncoder::parseGate(const string & nodeType, string & str) {
 	else if (nodeTypeTemp.find("inv") != -1)
 		str += "~";
 	else
-		str += nodeType;
+		str += "BUF";
 	str += "'";
 }
 
