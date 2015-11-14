@@ -6,7 +6,7 @@
 JSONEncoder::JSONEncoder(Circuit & circuit) {
 	this->circuit = &circuit;
 	if (!containsCycles()) {
-		gateIndex = inputIndex = 0;
+		gateIndex = inputIndex = outputIndex = 0;
 		for (int i = 0; i < circuit.getNodesCount(); i++) {
 			if (circuit.node(i).isOutputPort())
 				outputs.push_back(i);
@@ -113,6 +113,8 @@ pair<string, string> JSONEncoder::createJSON(int n) {
 		indexInGatesDescriptionsArrayReturn += to_string(circuitIndexToWavedromIndex[n]);
 		indexInGatesDescriptionsArray += to_string(circuitIndexToWavedromIndex[n]);
 	}
+	if (isOutput && circuitIndexToWavedromIndex[n] == -1)
+		circuitIndexToWavedromIndex[n] = outputIndex++;
 	for (int i = 0; i < circuit->getNodesCount(); i++) {
 		if ((*circuit)[i][n]) {
 			pair<string, string>recursionReturn = createJSON(i);
@@ -190,13 +192,13 @@ string JSONEncoder::getLongestPath(int n) {
 	queue<pair<int, pair<int, int > > >q;
 	q.push(mp3(0, -1, n));
 	reachTime[n] = 0;
-	int chosenOutput = -1;
+	int chosenStop = -1;
 	while (!q.empty()) {
 		int node = q.front().second.second, parent = q.front().second.first, step = q.front().first;
 		q.pop();
 		path[node] = parent;
-		if (circuit->node(node).isOutputPort()) {
-			chosenOutput = node;
+		if (circuit->node(node).isOutputPort() || (circuit->node(node).isGate() && circuit->node(node).getType().find("DFF") != -1)) {
+			chosenStop = node;
 			continue;
 		}
 		reachTime[node] = step;
@@ -205,14 +207,20 @@ string JSONEncoder::getLongestPath(int n) {
 				q.push(mp3(step + 1, node, i));
 		}
 	}
-	string longestPath = "[";
-	int currentNode = chosenOutput;
+	string longestPath;
+	int currentNode = chosenStop;
 	while (path[currentNode] != -1) {
-		if (longestPath != "[" && circuit->node(currentNode).isGate())
+		if (longestPath != "" && circuit->node(currentNode).isGate())
 			longestPath += ',';
 		if(circuit->node(currentNode).isGate())
 			longestPath += to_string(circuitIndexToWavedromIndex[currentNode]);
 		currentNode = path[currentNode];
+	}
+	if (circuit->node(chosenStop).isGate())
+		longestPath = "[0," + longestPath;
+	else if (circuit->node(chosenStop).isOutputPort()) {
+		longestPath = "[1," + longestPath;
+		longestPath += ',' + to_string(circuitIndexToWavedromIndex[chosenStop]);
 	}
 	longestPath += "]";
 	return longestPath;
