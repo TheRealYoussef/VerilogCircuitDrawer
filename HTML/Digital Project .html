@@ -3,6 +3,7 @@
 		<title>
 			Verilog Circuit Drawer
 		</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<style>
 	div {
     overflow:scroll;
@@ -102,77 +103,64 @@
 	
 		<div id="titleContainer">
 
-			<h1 id="titleText">Logic Gate Simulator</h1>
+			<h1 id="titleText">Verilog Circuit Drawer</h1>
 			
 		</div>
 		<div id="titleContainer">
 			<p id="text"> Displays the circuit, Longest Path, info of Gates</p>
 			<p id="text"><br><br><br></p>
 		</div>
-		<p>
-			<div ng-controller="ControlFile">
-  			<input type="file" id="file" name="file"/>
-  			<br>
-  			<button ng-click="submit()">submit</button>
- 			<p>{{data}}
- 		</p>
-		</div>
-		<script>
-			var myApp = angular.module('myApp',[]);
-			function ControlFile($scope) {
-    		$scope.data = 'none';
-    		$scope.submit= function(){
-    		var f = document.getElementById('file').files[0],
-          	r = new FileReader();
-    		r.onloadend = function(e){
-    	    $scope.data = e.target.result;
-      }
-      r.readAsBinaryString(f);
+		
+		<div>
+		<input type="file" id="fileinput" />
+		
+		<script type="text/javascript">
+			function sendFileToServer(evt) {
+    		var f = evt.target.files[0]; 
+
+   			 if (f) {
+   		   var r = new FileReader();
+   		   r.onload = function(e) { 
+			var xhr = new XMLHttpRequest();
+			var url = "http://localhost/testjs/test.php";
+			var plainData = e.target.result;			// data read from the file
+			var data = "data=" + encodeURIComponent(plainData);
+			xhr.open("POST", url, true);
+			xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+			xhr.onreadystatechange = function () {
+			if (xhr.readyState == 4 && xhr.status == 200) {
+				var result = xhr.responseText;
+				// server replied with this string
+				
+				alert(result);
+				}
+			};
+			xhr.send(data);
+     		 }
+    		  r.readAsText(f);
+    } else { 
+      alert("Failed to load file");
     }
-}
-			</script>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
+  }
+
+  document.getElementById('fileinput').addEventListener('change', sendFileToServer, false);
+</script>
+			
 
 		</div>
-		</p>
-
 		
 	</body>
 	<footer>
 		<div id="down">
 			<address>
-				Presented by: <a style="color:white" href="mailto:bahermursi@aucegypt.edu"><br> Baher Mursi</a> <a style="color:white" href="mailto:hebasakr@aucegypt.edu"><br>Heba Sakr</a><br><a style="color:white" href="mailto:therealyoussef@aucegypt.edu">Youssef Ayman</a><br><br>
+				Presented by: <a style="color:white" href="mailto:bahermursi@aucegypt.edu"><br> Baher Mursi</a> 
+
+				<a style="color:white" href="mailto:hebasakr@aucegypt.edu"><br>Heba Sakr</a><br>
+
+				<a style="color:white" href="mailto:therealyoussef@aucegypt.edu">Youssef Ayman</a><br><br>
 
 				Presented to: <a style="color:white" href="mailto:mshalan@aucegypt.edu"><br> Dr.Mohamed Shalan</a>. <br> <br>
-	
 			</address>	
-
 
 			<a style="color:white" href="http://catalog.aucegypt.edu/preview_course_nopop.php?catoid=20&coid=31887">Digital Design 1</a><br>
 				
