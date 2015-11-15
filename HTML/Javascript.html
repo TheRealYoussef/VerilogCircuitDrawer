@@ -1,0 +1,68 @@
+<html>
+	<body>
+		<script src="http://wavedrom.com/skins/default.js" type="text/javascript"></script>
+		<script src="http://wavedrom.com/WaveDrom.js" type="text/javascript"></script>
+		<script>
+			var JSONObject = {'JSONString' : {assign:[['Cout',['|',['&','Cin',['^','A','B']],['&','A','B']]],['S',['^','Cin',['^','A','B']]]]}, 'gatesDescriptions' : ['Type : or\nName: o1\nT-Rise: 0\nT-Fall: 0\n','Type : and\nName: a1\nT-Rise: 0\nT-Fall: 0\n','Type : xor\nName: xr1\nT-Rise: 0\nT-Fall: 0\n','Type : and\nName: a2\nT-Rise: 0\nT-Fall: 0\n','Type : xor\nName: xr2\nT-Rise: 0\nT-Fall: 0\n','Type : xor\nName: xr1\nT-Rise: 0\nT-Fall: 0\n'], 'longestPathsArray' : [[1,1,0,0],[1,2,1,0,0],[1,2,1,0,0],[1,2,1,0,0],[1,2,1,0,0],[1,1,0,0],[1,2,1,0,0],[1,2,1,0,0]]};
+			var waveJSON = JSONObject.JSONString;
+			var gatesDescriptions = JSONObject.gatesDescriptions;
+			var longestPathsArray = JSONObject.longestPathsArray;
+		</script>
+		<script type="WaveDrom">
+			waveJSON
+		</script>
+		<script>
+			var onMouseOverInput = function(i) {
+				var f = function() {
+					if (longestPathsArray[i].length > 0 && longestPathsArray[i][0] == 0) {
+						for (var j = 1; j < longestPathsArray[i].length; j++) {
+							gateArray[longestPathsArray[i][j]].setAttribute("style", "color: #000; fill: #0f0; fill-opacity: 1; stroke: #000; stroke-width: 1; stroke-opacity: 1");
+						}
+					}
+					else if (longestPathsArray[i].length > 0 && longestPathsArray[i][0] == 1) {
+						for (var j = 1; j < longestPathsArray[i].length - 1; j++) {
+							gateArray[longestPathsArray[i][j]].setAttribute("style", "color: #000; fill: #0f0; fill-opacity: 1; stroke: #000; stroke-width: 1; stroke-opacity: 1");
+						}
+						outputArray[longestPathsArray[i][longestPathsArray[i].length - 1]].setAttribute("style", "font-size:12px; font-style:normal; font-variant:normal; font-weight:500; font-stretch:normal; text-align:center; text-anchor:start; font-family:Helvetica; fill:#0f0");
+					}
+				}
+				return f;
+			}
+			var onMouseOutInput = function(i) {
+				var f = function() {
+					if (longestPathsArray[i].length > 0 && longestPathsArray[i][0] == 0) {
+						for (var j = 1; j < longestPathsArray[i].length; j++) {
+							gateArray[longestPathsArray[i][j]].setAttribute("style", "color: #000; fill: #ffc; fill-opacity: 1; stroke: #000; stroke-width: 1; stroke-opacity: 1");
+						}
+					}
+					else if (longestPathsArray[i].length > 0 && longestPathsArray[i][0] == 1) {
+						for (var j = 1; j < longestPathsArray[i].length - 1; j++) {
+							gateArray[longestPathsArray[i][j]].setAttribute("style", "color: #000; fill: #ffc; fill-opacity: 1; stroke: #000; stroke-width: 1; stroke-opacity: 1");
+						}
+						outputArray[longestPathsArray[i][longestPathsArray[i].length - 1]].setAttribute("style", "font-size:12px; font-style:normal; font-variant:normal; font-weight:500; font-stretch:normal; text-align:center; text-anchor:start; font-family:Helvetica; fill:#000");
+					}
+				}
+				return f;
+			}
+			WaveDrom.ProcessAll();
+			var gateArray = document.getElementsByClassName("gate");
+			var outputArray = document.getElementsByClassName("wirename");
+			for(var i = 0; i < gateArray.length; i++) {
+				if (gateArray[i].parentNode.childNodes[0].nodeName == "title")
+					gateArray[i].parentNode.childNodes[0].innerHTML = gatesDescriptions[i];
+				else {
+					gateArray[i].parentNode.parentNode.childNodes[0].innerHTML = gatesDescriptions[i];
+					gateArray[i].parentNode.childNodes[1].innerHTML = '';
+				}
+			}
+			var inputArray = document.getElementsByClassName("pinname");
+			for (var i = 0; i < inputArray.length; i++) {
+				inputArray[i].onmouseover = onMouseOverInput(i);
+				inputArray[i].onmouseout = onMouseOutInput(i);
+			}
+		</script>
+		<style>
+			.pinname:hover {fill: green !important;}
+		</style>
+	</body>
+</html>
