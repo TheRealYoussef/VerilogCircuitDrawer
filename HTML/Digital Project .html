@@ -5,20 +5,18 @@
 		</title>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<style>
-	div {
-    overflow:scroll;
-	}
+
+	<table style="width:100%"></table>
 
 	body{
 		display: block;
-		height: 700px;
 		margin-bottom: 0px;
 		margin-left: 0px;
 		margin-right: 0px;
 		margin-top: 0px;
-		width: 1180px; 
+		width: 100%;
+		height: 100%; 
 	}
-
 	#titleContainer{
 		
 		border-radius: 0em; 
@@ -31,19 +29,20 @@
         margin-left: 0px;
         margin-bottom: 0px;
         margin-top: 0px; 
-        width:1500px;"
+        width:100%;
+        
 	}
-
 	#titleText{
 		background-color:91241f;
     	color:white;
     	text-align:center;
     	padding:20px; 
-    	font-size: 300%;
+    	font-size: 500%;
     	margin-right: 0px;
         margin-left: 0px;
         margin-bottom: 0px;
         margin-top: 0px; 
+		font-family: arial;
 
 	} 
 	p{
@@ -55,7 +54,7 @@
     	color:white;
     	text-align:center;
     	padding:0px; 
-    	font-size: 100%;
+    	font-size: 150%;
     	margin-right: 0px;
         margin-left: 0px;
         margin-bottom: 0px;
@@ -71,11 +70,10 @@
         margin-left: 0px;
         margin-bottom: 0px;
         margin-top: 0px; 
-
+        width: 100%;
+        font-size: 140%
 	}
-
 	#down{
-
 		background-color:91241f;
 		border-radius: 0em; 
         border-width:0px; 
@@ -87,63 +85,92 @@
         margin-left: 0px;
         margin-bottom: 0px;
         margin-top: 0px; 
-        width:1500px;
+        width:100%;
         text-align: center;
 		color: white;
-		font-size: 120%
+		font-size: 140%
 	}
 
-	
-	
+	.buttonStyle {
+-webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+  cursor:pointer;
+  margin: 361px 361px 361px 361px;
+  padding: 10px;
+  overflow: hidden;
+  border: 1px solid #b7b7b7;
+  -webkit-border-radius: 3px;
+  border-radius: 25px;
+  font: italic normal normal 26px/1em "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  color: rgba(255,255,255,1);
+  text-indent: 50%;
+  -o-text-overflow: clip;
+  text-overflow: clip;
+  background-color:  91241f;
+  -webkit-transform: rotateX(1.7188733853924696deg) rotateY(2.291831180523293deg)   ;
+  transform: rotateX(1.7188733853924696deg) rotateY(2.291831180523293deg);
+  width: 70%;
+  text-align:center;
 
+}
+
+	
 	</style>	
  
 	</head>
 	<body>
-	
-		<div id="titleContainer">
 
-			<h1 id="titleText">Verilog Circuit Drawer</h1>
+
+			<div id="titleContainer">
+
+				<h1 id="titleText">Verilog Circuit Drawer</h1>
 			
-		</div>
-		<div id="titleContainer">
-			<p id="text"> Displays the circuit, Longest Path, info of Gates</p>
-			<p id="text"><br><br><br></p>
-		</div>
-		
+			</div>
+			<div id="titleContainer">
+				<p id="text"> Displays the circuit, Longest Path, info of Gates</p>
+				<p id="text"><br><br><br></p>
+			</div>
+
 		<div>
-		<input type="file" id="fileinput" />
+		<input class="buttonStyle" type="file" id="fileinput" />
 		
 		<script type="text/javascript">
 			function sendFileToServer(evt) {
     		var f = evt.target.files[0]; 
-
-   			 if (f) {
-   		   var r = new FileReader();
-   		   r.onload = function(e) { 
-			var xhr = new XMLHttpRequest();
-			var url = "http://localhost/testjs/test.php";
-			var plainData = e.target.result;			// data read from the file
-			var data = "data=" + encodeURIComponent(plainData);
-			xhr.open("POST", url, true);
+   				if (f) {
+   		    		var r = new FileReader();
+   		    		r.onload = function(e) { 
+					var xhr = new XMLHttpRequest();
+					var url = "http://localhost:8080";
+					var plainData = e.target.result;	// data read from the file
+					var data = "{\"data\" : \"" + encodeURIComponent(plainData) + "\"}";
+				xhr.open("POST", url, true);
 			xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 			xhr.onreadystatechange = function () {
 			if (xhr.readyState == 4 && xhr.status == 200) {
 				var result = xhr.responseText;
 				// server replied with this string
 				
+				var newWindow = window.open ('http://www.google.com','_self',false);
+				newWindow.receivedData = result;
 				alert(result);
 				}
 			};
-			xhr.send(data);
-     		 }
-    		  r.readAsText(f);
-    } else { 
-      alert("Failed to load file");
-    }
-  }
 
+			xhr.send(data);
+     		}
+    		r.readAsText(f);
+    		} 
+    		else { 
+      		alert("Failed to load file");
+   			}
+  }
   document.getElementById('fileinput').addEventListener('change', sendFileToServer, false);
+
+
+
+
 </script>
 			
 
@@ -153,13 +180,13 @@
 	<footer>
 		<div id="down">
 			<address>
-				Presented by: <a style="color:white" href="mailto:bahermursi@aucegypt.edu"><br> Baher Mursi</a> 
+				<strong>Presented by:</strong> <a style="color:white" href="mailto:bahermursi@aucegypt.edu"><br> Baher Mursi</a> 
 
 				<a style="color:white" href="mailto:hebasakr@aucegypt.edu"><br>Heba Sakr</a><br>
 
 				<a style="color:white" href="mailto:therealyoussef@aucegypt.edu">Youssef Ayman</a><br><br>
 
-				Presented to: <a style="color:white" href="mailto:mshalan@aucegypt.edu"><br> Dr.Mohamed Shalan</a>. <br> <br>
+				<strong>Presented to:</strong> <a style="color:white" href="mailto:mshalan@aucegypt.edu"><br> Dr.Mohamed Shalan</a>. <br> <br>
 			</address>	
 
 			<a style="color:white" href="http://catalog.aucegypt.edu/preview_course_nopop.php?catoid=20&coid=31887">Digital Design 1</a><br>
