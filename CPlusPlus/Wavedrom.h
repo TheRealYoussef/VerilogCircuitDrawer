@@ -10,48 +10,44 @@ public:
 	string getJSON() const;
 private:
 	Circuit *circuit;
-	vector<vector<bool> >adjacencyMatrix;
+	vector<int>adjacencyMatrix;
 	class NodeInformation {
 	public:
-		NodeInformation(string type, string name, bool isInput, bool isOutput, bool isGate, int tRise, int tFall, int index, int classIndex) {
-			this->type = type;
-			this->name = name;
-			this->isInput = isInput;
-			this->isOutput = isOutput;
-			this->isGate = isGate;
-			this->tRise = tRise;
-			this->tFall = tFall;
-			this->index = index;
+		NodeInformation(Node & node, int classIndex) {
+			this->node = &node;
 			this->classIndex = classIndex;
 			JSONDescription = createJSONDescription();
 			accessed = false;
 		}
 		string getType() const {
-			return type;
+			return node->getType();
 		}
 		string getName() const {
-			return name;
+			return node->getName();
 		}
-		bool getIsInput() const {
-			return isInput;
+		bool isInput() const {
+			return node->isInputPort();
 		}
-		bool getIsOutput() const {
-			return isOutput;
+		bool isOutput() const {
+			return node->isOutputPort();
 		}
-		bool getIsGate() const {
-			return isGate;
+		bool isGate() const {
+			return node->isGate();
 		}
-		int getTRise() const {
-			return tRise;
+		double getTRise() const {
+			return node->getTRise();
 		}
-		int getTFall() const {
-			return tFall;
-		}
-		int getIndex() const {
-			return index;
+		double getTFall() const {
+			return node->getTFall();
 		}
 		int getClassIndex() const {
 			return classIndex;
+		}
+		void setCircuitClassIndex(int circuitClassIndex) {
+			this->circuitClassIndex = circuitClassIndex;
+		}
+		int getCircuitClassIndex() const {
+			return circuitClassIndex;
 		}
 		void setAccessed(bool accessed) {
 			this->accessed = accessed;
@@ -62,33 +58,32 @@ private:
 		string getJSONDescription() const {
 			return JSONDescription;
 		}
-		bool operator==(const NodeInformation & nodeInformation) const {
-			return name == nodeInformation.name;
+		bool operator==(const Node & node) const {
+			return getType() == node.getType() && getName() == node.getName() && isInput() == node.isInputPort() && isOutput() == node.isOutputPort() && isGate() == node.isGate() && getTRise() == node.getTRise() && getTFall() == node.getTFall();
 		}
 	private:
-		string type, name;
-		bool isInput, isOutput, isGate;
-		int tRise, tFall;
-		int index;
+		Node *node;
 		int classIndex;
+		int circuitClassIndex;
 		bool accessed;
 		string JSONDescription;
 		string createJSONDescription() const {
-			return "'Type : " + type + "\\nName: " + name + "\\nT-Rise: " + to_string(tRise) + "\\nT-Fall: " + to_string(tFall) + "\\n'";
+			return "'Type : " + node->getType() + "\\nName: " + node->getName() + "\\nT-Rise: " + to_string(node->getTRise()) + "\\nT-Fall: " + to_string(node->getTFall()) + "\\n'";
 		}
 	};
 	vector<NodeInformation>wavedromNodesInformation;
 	vector<bool>visited;
 	string waveJSON;
-	string gatesInformation;
+	string gatesInformation, indexInGatesInformation;
 	string inputsLongestPaths;
-	int wavedromNodesCount;
+	string inputs;
 	int inputIndex, outputIndex, gateIndex;
 	void createAdjacencyMatrix(int);
 	void parseGate(const string &, string &);
 	void buildAdjacencyMatrix(int, int, int);
+	void labelCircuitClassIndex(int);
 	void createGatesInformations();
-	void generateAllInputsLongestPaths();
+	void generateInputsLongestPaths();
 	string generateLongestPathForInput(int);
 	pair<string, int> getLongestPath(int);
 };
