@@ -4,37 +4,43 @@ Wavedrom::Wavedrom(Circuit & circuit) {
 	this->circuit = &circuit;
 	waveJSON = "{assign:[";
 	vector<int>outputs;
-	wavedromNodesCount = 0;
 	inputIndex = outputIndex = gateIndex = 0;
+	inputs = "[";
 	for (int i = 0; i < circuit.getNodesCount(); i++) {
 		if (circuit.node(i).isOutputPort())
 			outputs.push_back(i);
+		if (circuit.node(i).isInputPort()) {
+			if (inputs != "[")
+				inputs += ',';
+			inputs += "'" + circuit.node(i).getName() + "'";
+		}
 	}
+	inputs += ']';
 	visited.resize(circuit.getNodesCount(), false);
 	for (int i = 0; i < outputs.size(); i++)
 		createAdjacencyMatrix(outputs[i]);
+	inputIndex = outputIndex = gateIndex = 0;
+	for (int i = 0; i < outputs.size(); i++)
+		labelCircuitClassIndex(outputs[i]);
 	waveJSON += "]}";
 	createGatesInformations();
-	adjacencyMatrix.resize(wavedromNodesCount);
-	for (int i = 0; i < wavedromNodesCount; i++)
-		adjacencyMatrix[i].resize(wavedromNodesCount, false);
+	adjacencyMatrix.resize(wavedromNodesInformation.size());
 	for (int i = 0; i < outputs.size(); i++) {
-		for (int j = 0; j < wavedromNodesCount; j++) {
-			if (wavedromNodesInformation[j].getIsOutput() && wavedromNodesInformation[j].getName() == circuit.node(outputs[i]).getName()) {
+		for (int j = 0; j < wavedromNodesInformation.size(); j++) {
+			if (wavedromNodesInformation[j] == circuit.node(outputs[i])) {
 				buildAdjacencyMatrix(outputs[i], j, -1);
 				break;
 			}
 		}
 	}
-	generateAllInputsLongestPaths();
+	generateInputsLongestPaths();
 }
 
 string Wavedrom::getJSON() const {
-	return "{'JSONString' : " + waveJSON + ", 'gatesDescriptions' : " + gatesInformation + ", 'longestPathsArray' : " + inputsLongestPaths + "}";
+	return "{'waveJSON' : " + waveJSON + ", 'gatesInformation' : " + gatesInformation + ", 'indexInGatesInformation' : " + indexInGatesInformation + ", 'inputsLongestPaths' : " + inputsLongestPaths + ", 'inputs' : " + inputs +"}";
 }
 
 void Wavedrom::createAdjacencyMatrix(int n) {
-	visited[n] = true;
 	int classIndex;
 	if (circuit->node(n).isInputPort())
 		classIndex = inputIndex++;
@@ -42,7 +48,7 @@ void Wavedrom::createAdjacencyMatrix(int n) {
 		classIndex = outputIndex++;
 	else if (circuit->node(n).isGate())
 		classIndex = gateIndex++;
-	wavedromNodesInformation.push_back(NodeInformation(circuit->node(n).getType(), circuit->node(n).getName(), circuit->node(n).isInputPort(), circuit->node(n).isOutputPort(), circuit->node(n).isGate(), circuit->node(n).getTRise(), circuit->node(n).getTFall(), wavedromNodesCount++, classIndex));
+	wavedromNodesInformation.push_back(NodeInformation(circuit->node(n), classIndex));
 	if (waveJSON != "{assign:[")
 		waveJSON += ',';
 	if (circuit->node(n).isOutputPort() || circuit->node(n).isGate())
@@ -57,7 +63,6 @@ void Wavedrom::createAdjacencyMatrix(int n) {
 	}
 	if (circuit->node(n).isOutputPort() || circuit->node(n).isGate())
 		waveJSON += ']';
-	visited[n] = true;
 }
 
 void Wavedrom::parseGate(const string & nodeType, string & str) {
@@ -88,53 +93,69 @@ void Wavedrom::parseGate(const string & nodeType, string & str) {
 	str += "'";
 }
 
-void Wavedrom::buildAdjacencyMatrix(int n, int adjN, int adjP) {
+void Wavedrom::labelCircuitClassIndex(int n)  {
 	visited[n] = true;
+	int circuitClassIndex;
+	if (circuit->node(n).isInputPort())
+		circuitClassIndex = inputIndex++;
+	else if (circuit->node(n).isOutputPort())
+		circuitClassIndex = outputIndex++;
+	else if (circuit->node(n).isGate())
+		circuitClassIndex = gateIndex++;
+	for (int i = 0; i < wavedromNodesInformation.size(); i++) {
+		if (wavedromNodesInformation[i] == circuit->node(n))
+			wavedromNodesInformation[i].setCircuitClassIndex(circuitClassIndex);
+	}
+	for (int i = 0; i < circuit->getNodesCount(); i++) {
+		if ((*circuit)[i][n] && !visited[i])
+			labelCircuitClassIndex(i);
+	}
+}
+
+void Wavedrom::buildAdjacencyMatrix(int n, int adjN, int adjP) {
 	wavedromNodesInformation[adjN].setAccessed(true);
 	if (adjP != -1)
-		adjacencyMatrix[adjN][adjP] = true;
+		adjacencyMatrix[adjN] = adjP;
 	for (int i = 0; i < circuit->getNodesCount(); i++) {
 		if ((*circuit)[i][n]) {
-			for (int j = 0; j < wavedromNodesCount; j++) {
-				if (wavedromNodesInformation[j].getName() == circuit->node(i).getName() && !wavedromNodesInformation[j].getAccessed()) {
+			for (int j = 0; j < wavedromNodesInformation.size(); j++) {
+				if (wavedromNodesInformation[j] == circuit->node(i) && !wavedromNodesInformation[j].getAccessed()) {
 						buildAdjacencyMatrix(i, j, adjN);
 						break;
 				}
 			}
 		}
 	}
-	visited[n] = false;
 }
 
 void Wavedrom::createGatesInformations() {
+	int currentGateIndex = 0;
 	gatesInformation = '[';
-	for (int i = 0; i < wavedromNodesCount; i++) {
-		if (wavedromNodesInformation[i].getIsGate()) {
-			if (gatesInformation != "[")
-				gatesInformation += ',';
-			gatesInformation += wavedromNodesInformation[i].getJSONDescription();
+	indexInGatesInformation = '[';
+	for (int i = 0; i < wavedromNodesInformation.size(); i++) {
+		if (wavedromNodesInformation[i].isGate()) {
+			if (wavedromNodesInformation[i].getCircuitClassIndex() == currentGateIndex) {
+				if (gatesInformation != "[")
+					gatesInformation += ',';
+				gatesInformation += wavedromNodesInformation[i].getJSONDescription();
+				currentGateIndex++;
+			}
+			if (indexInGatesInformation != "[")
+				indexInGatesInformation += ',';
+			indexInGatesInformation += to_string(wavedromNodesInformation[i].getCircuitClassIndex());
 		}
 	}
+	indexInGatesInformation += ']';
 	gatesInformation += ']';
 }
 
-void Wavedrom::generateAllInputsLongestPaths() {
-	vector<string>inputsLongestPathsArray(wavedromNodesCount);
+void Wavedrom::generateInputsLongestPaths() {
+	inputsLongestPaths = '[';
 	for (int i = 0; i < circuit->getNodesCount(); i++) {
 		if (circuit->node(i).isInputPort()) {
-			string currentInputLongestPath = generateLongestPathForInput(i);
-			for (int j = 0; j < wavedromNodesCount; j++) {
-				if (wavedromNodesInformation[j].getIsInput() && wavedromNodesInformation[j].getName() == circuit->node(i).getName())
-					inputsLongestPathsArray[j] = currentInputLongestPath;
-			}
-		}
-	}
-	inputsLongestPaths = "[";
-	for (int i = 0; i < wavedromNodesCount; i++) {
-		if (inputsLongestPathsArray[i] != "") {
 			if (inputsLongestPaths != "[")
 				inputsLongestPaths += ',';
-			inputsLongestPaths += inputsLongestPathsArray[i];
+			inputsLongestPaths += generateLongestPathForInput(i);
 		}
 	}
 	inputsLongestPaths += ']';
@@ -143,8 +164,8 @@ void Wavedrom::generateAllInputsLongestPaths() {
 string Wavedrom::generateLongestPathForInput(int n) {
 	string longestPathJSON;
 	int longestPath = -1;
-	for (int i = 0; i < wavedromNodesCount; i++) {
-		if (wavedromNodesInformation[i].getName() == circuit->node(n).getName()) {
+	for (int i = 0; i < wavedromNodesInformation.size(); i++) {
+		if (wavedromNodesInformation[i] == circuit->node(n)) {
 			pair<string, int> wavedromInputLongestPath = getLongestPath(i);
 			if (wavedromInputLongestPath.second > longestPath) {
 				longestPath = wavedromInputLongestPath.second;
@@ -159,26 +180,16 @@ pair<string, int> Wavedrom::getLongestPath(int n) {
 	string pathJSON;
 	int pathLength = 0;
 	int currentNode = n;
-	for (int i = 0; i < adjacencyMatrix[n].size(); i++) {
-		if (adjacencyMatrix[n][i]) {
-			currentNode = i;
-			break;
-		}
-	}
+	currentNode = adjacencyMatrix[n];
 	vector<int>pathTaken;
-	while (!wavedromNodesInformation[currentNode].getIsOutput()) {
+	while (!wavedromNodesInformation[currentNode].isOutput()) {
 		pathLength++;
 		pathTaken.push_back(wavedromNodesInformation[currentNode].getClassIndex());
-		if (wavedromNodesInformation[currentNode].getIsGate() && wavedromNodesInformation[currentNode].getType().find("DFF") != -1)
+		if (wavedromNodesInformation[currentNode].isGate() && wavedromNodesInformation[currentNode].getType().find("DFF") != -1)
 			break;
-		for (int i = 0; i < adjacencyMatrix[currentNode].size(); i++) {
-			if (adjacencyMatrix[currentNode][i]) {
-				currentNode = i;
-				break;
-			}
-		}
+		currentNode = adjacencyMatrix[currentNode];
 	}
-	if (wavedromNodesInformation[currentNode].getIsGate() && wavedromNodesInformation[currentNode].getType().find("DFF") != -1)
+	if (wavedromNodesInformation[currentNode].isGate() && wavedromNodesInformation[currentNode].getType().find("DFF") != -1)
 		pathJSON = "[0";
 	else
 		pathJSON = "[1";
@@ -186,7 +197,7 @@ pair<string, int> Wavedrom::getLongestPath(int n) {
 		pathJSON += ',';
 		pathJSON += to_string(pathTaken[i]);
 	}
-	if (wavedromNodesInformation[currentNode].getIsOutput()) {
+	if (wavedromNodesInformation[currentNode].isOutput()) {
 		pathJSON += ',';
 		pathJSON += to_string(wavedromNodesInformation[currentNode].getClassIndex());
 	}
