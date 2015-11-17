@@ -1,0 +1,292 @@
+<html>
+<head>
+    <title>
+        Verilog Circuit Drawer
+    </title>
+    <script src="ajaxwavedrom.js"></script>
+    <style>
+        body {
+            display: block;
+            margin-bottom: 0px;
+            margin-left: 0px;
+            margin-right: 0px;
+            margin-top: 0px;
+            width: 100%;
+            height: 100%;
+        }
+
+        #titleContainer {
+            border-radius: 0em;
+            border-width: 0px;
+            padding-left: 0px;
+            padding-top: 0px;
+            padding-bottom: 0px;
+            margin: 0px;
+            margin-right: 0px;
+            margin-left: 0px;
+            margin-bottom: 0px;
+            margin-top: 0px;
+            width: 100%;
+        }
+
+        #titleText {
+            background-color: #91241f;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 200%;
+            margin-right: 0px;
+            margin-left: 0px;
+            margin-bottom: 0px;
+            margin-top: 0px;
+            font-family: arial;
+        }
+
+        p {
+            text-align: center;
+            color: white;
+        }
+
+        #text {
+            background-color: #91241f;
+            color: white;
+            text-align: center;
+            padding: 0px;
+            font-size: 120%;
+            margin-right: 0px;
+            margin-left: 0px;
+            margin-bottom: 0px;
+            margin-top: 0px;
+        }
+
+        #foot {
+            background-color: #91241f;
+            color: white;
+            text-align: center;
+            padding: 0px;
+            font-size: 100%;
+            margin-right: 0px;
+            margin-left: 0px;
+            margin-bottom: 0px;
+            margin-top: 0px;
+            width: 100%;
+            font-size: 120%;
+        }
+
+        #down {
+            background-color: #91241f;
+            border-radius: 0em;
+            border-width: 0px;
+            padding-left: 0px;
+            padding-top: 0px;
+            padding-bottom: 0px;
+            margin: 0px;
+            margin-right: 0px;
+            margin-left: 0px;
+            margin-bottom: 0px;
+            margin-top: 0px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 120%;
+        }
+
+        .buttonStyle {
+            -webkit-box-sizing: content-box;
+            -moz-box-sizing: content-box;
+            box-sizing: content-box;
+            cursor: pointer;
+            margin: 361px 361px 361px 361px;
+            padding: 10px;
+            overflow: hidden;
+            border: 1px solid #b7b7b7;
+            -webkit-border-radius: 3px;
+            border-radius: 25px;
+            font: italic normal normal 26px/1em "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+            color: rgba(255,255,255,1);
+            text-indent: 50%;
+            -o-text-overflow: clip;
+            text-overflow: clip;
+            background-color: #91241f;
+            -webkit-transform: rotateX(1.7188733853924696deg) rotateY(2.291831180523293deg);
+            transform: rotateX(1.7188733853924696deg) rotateY(2.291831180523293deg);
+            width: 70%;
+            text-align: center;
+        }
+    </style>
+    <script src="WaveDromSkin.js" type="text/javascript"></script>
+    <script src="wavedromdef.js" type="text/javascript"></script>
+    <script>
+        var JSONObject = null;
+        var waveJSON = null;
+        var gatesInformation = null;
+        var indexInGatesInformation = null;
+        var inputsLongestPaths = null;
+        var inputs = null;
+        var buttons = [];
+        var buttonClick = [];
+        var gateArray = null;
+        var outputArray = null;
+
+        function initializePage(result) {
+            JSONObject = JSON.parse(result);
+            waveJSON = JSONObject.waveJSON;
+            gatesInformation = JSONObject.gatesInformation;
+            indexInGatesInformation = JSONObject.indexInGatesInformation;
+            inputsLongestPaths = JSONObject.inputsLongestPaths;
+            inputs = JSONObject.inputs;
+            var head = document.getElementsByTagName('body')[0];
+            var script = document.createElement('script');
+            script.type = 'WaveDrom';
+            head.appendChild(script);
+            script.innerHTML = "waveJSON";
+            WaveDrom.ProcessAll();
+            var textnode = document.createTextNode("Highlight longest path for input: ");
+            document.body.appendChild(textnode);
+            gateArray = document.getElementsByClassName("gate");
+            outputArray = document.getElementsByClassName("wirename");
+            for (var i = 0; i < gateArray.length; i++) {
+                if (gateArray[i].parentNode.childNodes[0].nodeName == "title")
+                    gateArray[i].parentNode.childNodes[0].innerHTML = gatesInformation[indexInGatesInformation[i]];
+                else {
+                    gateArray[i].parentNode.parentNode.childNodes[0].innerHTML = gatesInformation[indexInGatesInformation[i]];
+                    gateArray[i].parentNode.childNodes[1].innerHTML = '';
+                }
+            }
+            buttonClick = [];
+            for (var i = 0; i < inputs.length; i++) {
+                buttonClick.push(0);
+                buttons.push(createRadioElement(i));
+                document.body.appendChild(buttons[buttons.length - 1]);
+            }
+            for (var i = 0; i < buttons.length; i++)
+                buttons[i].onclick = colorPath(i);
+        }
+
+        function createRadioElement(index) {
+            var button = document.createElement("BUTTON");
+            var text = document.createTextNode(inputs[index]);
+            button.appendChild(text);
+            return button;
+        }
+
+        function colorPath(index) {
+            var f = function () {
+                if (buttonClick[index] == 0) {
+                    for (var i = 0; i < buttons.length; i++) {
+                        if (i != index) {
+                            if (inputsLongestPaths[i].length > 0 && inputsLongestPaths[i][0] == 0) {
+                                for (var j = 1; j < inputsLongestPaths[i].length; j++) {
+                                    gateArray[inputsLongestPaths[i][j]].setAttribute("style", "color: #000; fill: #ffc; fill-opacity: 1; stroke: #000; stroke-width: 1; stroke-opacity: 1");
+                                }
+                            }
+                            else if (inputsLongestPaths[i].length > 0 && inputsLongestPaths[i][0] == 1) {
+                                for (var j = 1; j < inputsLongestPaths[i].length - 1; j++) {
+                                    gateArray[inputsLongestPaths[i][j]].setAttribute("style", "color: #000; fill: #ffc; fill-opacity: 1; stroke: #000; stroke-width: 1; stroke-opacity: 1");
+                                }
+                                outputArray[inputsLongestPaths[i][inputsLongestPaths[i].length - 1]].setAttribute("style", "font-size:12px; font-style:normal; font-variant:normal; font-weight:500; font-stretch:normal; text-align:center; text-anchor:start; font-family:Helvetica; fill:#000");
+                            }
+                            buttonClick[i] = 0;
+                            buttons[i].style.fontWeight = "normal";
+                        }
+                    }
+                    if (inputsLongestPaths[index].length > 0 && inputsLongestPaths[index][0] == 0) {
+                        for (var j = 1; j < inputsLongestPaths[index].length; j++) {
+                            gateArray[inputsLongestPaths[index][j]].setAttribute("style", "color: #000; fill: #0f0; fill-opacity: 1; stroke: #000; stroke-width: 1; stroke-opacity: 1");
+                        }
+                    }
+                    else if (inputsLongestPaths[index].length > 0 && inputsLongestPaths[index][0] == 1) {
+                        for (var j = 1; j < inputsLongestPaths[index].length - 1; j++) {
+                            gateArray[inputsLongestPaths[index][j]].setAttribute("style", "color: #000; fill: #0f0; fill-opacity: 1; stroke: #000; stroke-width: 1; stroke-opacity: 1");
+                        }
+                        outputArray[inputsLongestPaths[index][inputsLongestPaths[index].length - 1]].setAttribute("style", "font-size:12px; font-style:normal; font-variant:normal; font-weight:500; font-stretch:normal; text-align:center; text-anchor:start; font-family:Helvetica; fill:#0f0");
+                    }
+                    buttonClick[index] = 1;
+                    buttons[index].style.fontWeight = "bold";
+                }
+                else {
+                    if (inputsLongestPaths[index].length > 0 && inputsLongestPaths[index][0] == 0) {
+                        for (var j = 1; j < inputsLongestPaths[index].length; j++) {
+                            gateArray[inputsLongestPaths[index][j]].setAttribute("style", "color: #000; fill: #ffc; fill-opacity: 1; stroke: #000; stroke-width: 1; stroke-opacity: 1");
+                        }
+                    }
+                    else if (inputsLongestPaths[index].length > 0 && inputsLongestPaths[index][0] == 1) {
+                        for (var j = 1; j < inputsLongestPaths[index].length - 1; j++) {
+                            gateArray[inputsLongestPaths[index][j]].setAttribute("style", "color: #000; fill: #ffc; fill-opacity: 1; stroke: #000; stroke-width: 1; stroke-opacity: 1");
+                        }
+                        outputArray[inputsLongestPaths[index][inputsLongestPaths[index].length - 1]].setAttribute("style", "font-size:12px; font-style:normal; font-variant:normal; font-weight:500; font-stretch:normal; text-align:center; text-anchor:start; font-family:Helvetica; fill:#000");
+                    }
+                    buttonClick[index] = 0;
+                    buttons[index].style.fontWeight = "normal";
+                }
+            }
+            return f;
+        }
+    </script>
+    <script type="text/javascript">
+        function sendFileToServer(evt) {
+            var foo = evt.target.files[0];
+            if (foo) {
+                var r = new FileReader();
+                r.onload = function (e) {
+                    var xhr = new XMLHttpRequest();
+                    var url = "http://localhost:8080";
+                    var plainData = e.target.result;    // data read from the file
+                    var data = "{\"data\" : \"" + encodeURIComponent(plainData) + "\"}";
+                    xhr.open("POST", url, true);
+                    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState == 4 && xhr.status == 200) {
+                            var result = xhr.responseText;
+                            var bodyElements = document.getElementById("pageOne");
+                            bodyElements.parentNode.removeChild(bodyElements);
+                            initializePage(result);
+                        }
+                    };
+                    xhr.send(data);
+                }
+                r.readAsText(foo);
+            }
+            else
+                alert("Failed to load file");
+        }
+    </script>
+</head>
+<body>
+    <div id="pageOne">
+        <div id="titleContainer">
+            <h1 id="titleText">Verilog Circuit Drawer</h1>
+        </div>
+        <div id="titleContainer">
+            <p id="text"> Displays the circuit, Longest Path, info of Gates</p>
+            <p id="text"><br><br><br></p>
+        </div>
+        <div>
+            <input class="buttonStyle" type="file" id="fileinput" />
+            <script>
+                document.getElementById('fileinput').addEventListener('change', sendFileToServer, false);
+            </script>
+        </div>
+    </div>
+</body>
+<footer>
+    <div id="down">
+        <address>
+            <strong>Presented by:</strong> <a style="color:white" href="mailto:bahermursi@aucegypt.edu"><br> Baher Mursi</a>
+
+            <a style="color:white" href="mailto:hebasakr@aucegypt.edu"><br>Heba Sakr</a><br>
+
+            <a style="color:white" href="mailto:therealyoussef@aucegypt.edu">Youssef Ayman</a><br><br>
+
+            <strong>Presented to:</strong> <a style="color:white" href="mailto:mshalan@aucegypt.edu"><br> Dr.Mohamed Shalan</a>. <br> <br>
+        </address>
+
+        <a style="color:white" href="http://catalog.aucegypt.edu/preview_course_nopop.php?catoid=20&coid=31887">Digital Design 1</a><br>
+
+        Project 1<br>
+        For any questions: <a style="color:white" href="mailto:bahermursi@aucegypt.edu,hebasakr@aucegypt.edu, therealyoussef@aucegypt.edu">Contact us</a>
+
+    </div>
+
+</footer>
+</html>
